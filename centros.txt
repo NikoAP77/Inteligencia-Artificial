@@ -1,0 +1,52 @@
+CREATE (a:Station {name: 'Universidad Politecnica Salesiana',             latitude: -2.886727, longitude: -78.989267}),
+       (b:Station {name: 'Centro Educativo Particular Nuestro Mundo',     latitude: -2.882740, longitude: -78.994098}),
+       (c:Station {name: 'Unidad Educativa Ricardo Muñoz Chavez',         latitude: -2.894534, longitude: -78.984344}),
+       (d:Station {name: 'Centro Educativo Infantil Semillitas',          latitude: -2.886117, longitude: -78.965200}),
+       (e:Station {name: 'Centro Educativo Arco Iris',                    latitude: -2.883207, longitude: -79.006310}),
+       (f:Station {name: 'Centro Educativo Los Pinos',                    latitude: -2.899402, longitude: -78.997443}),
+       (g:Station {name: 'Centro Educativo Infantil Letras y Vida',      latitude: -2.903896, longitude: -78.994335}),
+       (h:Station {name: 'Escuela de Educación Básica El Sol',            latitude: -2.892292, longitude: -78.974021}),
+       (i:Station {name: 'Safari Kids',                                   latitude: -2.886973, longitude: -78.958972}),
+       (j:Station {name: 'Centro de Educación Inicial Ciudad de Cuenca ', latitude: -2.892990, longitude: -79.008008}),
+       (k:Station {name: 'Direccion Educacion',                           latitude: -2.894902, longitude: -79.006605}), 
+       (l:Station {name: 'Universidad de Cuenca',                         latitude: -2.899819, longitude: -79.010004}),
+       (m:Station {name: 'Centro Educativo San Andres',                   latitude: -2.904791, longitude: -78.998557}),
+       (n:Station {name: 'Unidad Educativa Particular CEDEI',             latitude: -2.910579, longitude: -79.004480}),
+       (o:Station {name: 'Centro Infantil el Camino',                     latitude: -2.909203, longitude: -78.997850}),
+       (a)-[:CONNECTION {time: 0.6}]->(b),
+       (a)-[:CONNECTION {time: 1.0}]->(c),
+       (a)-[:CONNECTION {time: 2.6}]->(d), 
+       (b)-[:CONNECTION {time: 1.3}]->(e),
+       (b)-[:CONNECTION {time: 1.8}]->(f),
+       (e)-[:CONNECTION {time: 1.0}]->(j),
+       (j)-[:CONNECTION {time: 0.2}]->(k),
+       (c)-[:CONNECTION {time: 1.6}]->(f),
+       (c)-[:CONNECTION {time: 1.1}]->(h),
+       (h)-[:CONNECTION {time: 1.2}]->(d),
+       (h)-[:CONNECTION {time: 1.7}]->(i),
+       (d)-[:CONNECTION {time: 0.7}]->(i),
+       (c)-[:CONNECTION {time: 1.5}]->(g),
+       (f)-[:CONNECTION {time: 1.1}]->(k),
+       (f)-[:CONNECTION {time: 0.5}]->(m),
+       (k)-[:CONNECTION {time: 0.7}]->(l),
+       (f)-[:CONNECTION {time: 1.4}]->(l),
+       (l)-[:CONNECTION {time: 1.2}]->(n),
+       (m)-[:CONNECTION {time: 0.9}]->(n),
+       (g)-[:CONNECTION {time: 0.7}]->(o),
+       (g)-[:CONNECTION {time: 0.4}]->(m),
+       (o)-[:CONNECTION {time: 0.7}]->(n)
+
+
+
+MATCH (start:Station {name: "Universidad Politecnica Salesiana"}), (end:Station {name: "Universidad de Cuenca"})
+CALL gds.alpha.shortestPath.astar.stream({
+  nodeQuery: 'MATCH (p:Station) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS weight',
+  startNode: start,
+  endNode: end,
+  relationshipWeightProperty: 'weight',
+  propertyKeyLat: 'latitude',
+  propertyKeyLat: 'longitude'
+})
+YIELD nodeId, cost
+RETURN gds.util.asNode(nodeId).name AS station, cost

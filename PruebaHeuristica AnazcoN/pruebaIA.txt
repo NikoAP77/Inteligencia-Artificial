@@ -1,0 +1,53 @@
+BUSQUEDA A*
+
+CREATE (a:Station {name: 'Mapasingue',             latitude: 2.163280, longitude: -79.919983}),
+       (b:Station {name: 'Iglesia Catolica Maria Madre de la Iglesia',     latitude: -2.167238, longitude: -79.938714}),
+       (c:Station {name: 'Iglesia Catolica Santo Tomas de Aquino',         latitude: -2.129314, longitude: -79.945655}),
+       (d:Station {name: 'Iglesia Catolica Santo Tomas',          latitude: -2.082948, longitude: -79.917121}),
+       (e:Station {name: 'Iglesia Santa Isabel',                    latitude: -2.125842, longitude: -79.893924}),
+       (f:Station {name: 'Iglesia de la Nina Maria',                    latitude: -2.152932, longitude: -79.887695}),
+       (g:Station {name: 'Iglesia la Redonda Urdesa',      latitude: -2.173630, longitude: -79.906897}),
+       (h:Station {name: 'Iglesia San Juan Apostol',            latitude: -2.116310, longitude: -79.891654}),
+       (i:Station {name: 'Iglesia Catolica Nuestra Senora de Czestochowa',                                   latitude: -2.134286, longitude: -79.886210}),
+       (j:Station {name: 'Iglesia Biblica Cristiana', latitude: -2.179037, longitude: -79.898537}),
+       (k:Station {name: 'Iglesia Catolica Senor de la Buena Esperanza',                           latitude: -2.172930, longitude: -79.885459}), 
+       (l:Station {name: 'Iglesia de la Victoria Nuestra',                         latitude: -2.193211, longitude: 79.890767}),
+       (m:Station {name: 'Iglesia Catolica Santo Domingo de Guzman',                   latitude: -2.181941, longitude: -79.878106}),
+       (n:Station {name: 'Iglesia la Merced',             latitude: -2.190085, longitude: -79.881033}),
+       (o:Station {name: 'Iglesia San Jose',                     latitude: -2.201760, longitude: -79.883361}),
+       (p:Station {name: 'Iglesia Cristiana Cristo Vive',                     latitude: -2.222465, longitude: -79.892814}),
+       (a)-[:CONNECTION {time: 2.7}]->(b),
+       (a)-[:CONNECTION {time: 6.0}]->(c),
+       (a)-[:CONNECTION {time: 10.6}]->(d),   
+       (a)-[:CONNECTION {time: 6.7}]->(e),
+       (a)-[:CONNECTION {time: 6.5}]->(f),
+       (a)-[:CONNECTION {time: 2.1}]->(g),
+       (c)-[:CONNECTION {time: 8.2}]->(d),
+       (e)-[:CONNECTION {time: 1.0}]->(h),
+       (e)-[:CONNECTION {time: 1.3}]->(i),
+       (f)-[:CONNECTION {time: 2.3}]->(i),
+       (g)-[:CONNECTION {time: 1.2}]->(j),
+       (g)-[:CONNECTION {time: 3.7}]->(k),
+       (j)-[:CONNECTION {time: 2.7}]->(k),
+       (j)-[:CONNECTION {time: 2.2}]->(l),
+       (k)-[:CONNECTION {time: 1.9}]->(m),
+       (l)-[:CONNECTION {time: 1.2}]->(n),
+       (l)-[:CONNECTION {time: 1.6}]->(o),
+       (l)-[:CONNECTION {time: 4.4}]->(p),
+       (l)-[:CONNECTION {time: 2.4}]->(m)
+       
+
+
+MATCH (start:Station {name: "Mapasingue"}), (end:Station {name: "Iglesia Catolica Santo Domingo de Guzman"})
+CALL gds.alpha.shortestPath.astar.stream({
+  nodeQuery: 'MATCH (p:Station) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS weight',
+  startNode: start,
+  endNode: end,
+  relationshipWeightProperty: 'weight',
+  propertyKeyLat: 'latitude',
+  propertyKeyLat: 'longitude'
+})
+YIELD nodeId, cost
+RETURN gds.util.asNode(nodeId).name AS station, cost
+

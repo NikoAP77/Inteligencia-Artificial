@@ -1,0 +1,4 @@
+LOAD CSV FROM "http://archive.ics.uci.edu/ml/machine-learning-databases/voting-records/house-votes-84.data" as row
+CREATE (p:Person)
+SET p.class = row[0],
+    p.features = row[1..];

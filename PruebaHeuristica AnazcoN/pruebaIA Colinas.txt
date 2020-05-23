@@ -1,0 +1,49 @@
+BUSQUEDA ASCENSO DE COLINA
+
+CREATE (a:Loc {name: 'Mapasingue'}),
+(b:Loc {name: 'Iglesia Catolica Maria Madre de la Iglesia''}),
+(c:Loc {name: 'Iglesia Catolica Santo Tomas de Aquino'}),
+(d:Loc {name: 'Iglesia Catolica Santo Tomas'}),
+(e:Loc {name: 'Iglesia Santa Isabel'}),
+(f:Loc {name: 'Iglesia de la Nina Maria'}),
+(g:Loc {name: 'Iglesia la Redonda Urdesa'}),
+(h:Loc {name: 'Iglesia San Juan Apostol'}),
+(i:Loc {name: 'Iglesia Catolica Nuestra Senora de Czestochowa'}),
+(j:Loc {name: 'Iglesia Biblica Cristiana'}),
+(k:Loc {name: 'Iglesia Catolica Senor de la Buena Esperanza'}),
+(l:Loc {name: 'Iglesia de la Victoria Nuestra'}),
+(m:Loc {name: 'Iglesia Catolica Santo Domingo de Guzman'}),
+(n:Loc {name: 'Iglesia la Merced'}),
+(o:Loc {name: 'Iglesia San Jose'}),
+(p:Loc {name: 'Iglesia Cristiana Cristo Vive'}),
+(a)-[:ROAD {cost: 2.7}]->(b),
+(a)-[:ROAD {cost: 6.0}]->(c),
+(a)-[:ROAD {cost: 10.6}]->(d),
+(a)-[:ROAD {cost: 6.7}]->(e),
+(a)-[:ROAD {cost: 6.5}]->(f),
+(a)-[:ROAD {cost: 2.1}]->(g),
+(c)-[:ROAD {cost: 8.2}]->(d),
+(e)-[:ROAD {cost: 1.0}]->(h),
+(e)-[:ROAD {cost: 1.3}]->(i),
+(f)-[:ROAD {cost: 2.3}]->(i),
+(g)-[:ROAD {cost: 1.2}]->(j),
+(g)-[:ROAD {cost: 3.7}]->(k),
+(j)-[:ROAD {cost: 2.7}]->(k),
+(j)-[:ROAD {cost: 2.2}]->(l),
+(k)-[:ROAD {cost: 1.9}]->(m),
+(l)-[:ROAD {cost: 1.2}]->(n);
+(l)-[:ROAD {cost: 1.6}]->(o),
+(l)-[:ROAD {cost: 4.4}]->(p);
+(l)-[:ROAD {cost: 2.4}]->(m);
+
+MATCH (start:Loc {name: 'Mapasingue'}), (end:Loc {name: 'Iglesia Catolica Santo Domingo de Guzman'})
+CALL gds.alpha.shortestPath.stream({
+nodeQuery:'MATCH(n:Loc) RETURN id(n) AS id',
+relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target,
+r.cost AS weight',
+startNode: start,
+relationshipWeightProperty: 'weight',
+endNode: end
+})
+YIELD nodeId, cost
+RETURN gds.util.asNode(nodeId).name AS name, cost

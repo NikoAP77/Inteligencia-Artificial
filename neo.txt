@@ -1,0 +1,24 @@
+Cargar un csv
+
+LOAD CSV WITH HEADERS FROM 'file:///C:/Users/USER/Desktop/winequality-red.csv' 
+AS line CREATE (:Wine { alcohol:toFloat(line.alcohol), 
+quality: toInteger(line.quality)})
+
+MATCH (test:Test)
+WITH test,test.feature_vector as feature_vector
+CALL apoc.cypher.run('MATCH (training:Training)
+    // calculate euclidian distance between each test node and all training nodes
+    WITH training,gds.apha.similarity.euclideanDistance($feature_vector, training.feature_vector) AS similarity
+    // return only top 3 nodes
+    ORDER BY similarity ASC LIMIT 3
+    RETURN collect(training.class) as classes',
+    {feature_vector:feature_vector}) YIELD value
+WITH test.class as class, apoc.coll.sortMaps(apoc.coll.frequencies(value.classes), '^count')[-1].item as predicted_class
+WITH sum(CASE when class = predicted_class THEN 1 ELSE 0 END) as correct_predictions, count(*) as total_predictions
+RETURN correct_predictions,total_predictions, correct_predictions / toFloat(total_predictions) as ratio
+
+
+
+validooooooo
+
+MATCH (test:Test)WITH test,test.feature_vector as feature_vectorCALL apoc.cypher.run('MATCH (training:Training)'	WITH training,gds.alpha.similarity.euclideanDistance($feature_vector, training.feature_vector) AS similarity    ORDER BY similarity ASC LIMIT 3    RETURN collect(training.class) as classes',    {feature_vector:feature_vector}) YIELD valueWITH test.class as class, apoc.coll.sortMaps(apoc.coll.frequencies(value.classes), '^count')[-1].item as predicted_classWITH sum(CASE when class = predicted_class THEN 1 ELSE 0 END) as correct_predictions, count(*) as total_predictionsRETURN correct_predictions,total_predictions, correct_predictions / toFloat(total_predictions) as ratio;
